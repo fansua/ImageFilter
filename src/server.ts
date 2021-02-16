@@ -33,14 +33,20 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   app.get("/filteredimage", async (req, res)=> {
     const {image_url} = req.query; 
+    let img: string = "";
     
     if(!image_url){
       return res.status(400).send({error:"public image url is required!"})
     }
-    const img:string = await filterImageFromURL(image_url); 
 
-    res.status(200).sendFile(img,{} , () => {
+    try{
+      img = await filterImageFromURL(image_url);
+    } catch(error){
+      return res.status(422).send({error:"Server was unable to process the image_url"})
+    }
 
+    res.status(200).sendFile(img, () => {
+     
       console.log("Deleting the image")
       deleteLocalFiles([img])
     })
